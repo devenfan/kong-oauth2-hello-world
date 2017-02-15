@@ -3,9 +3,7 @@ html
   head
     title Authorize Application
   body
-    h1 Authorize #{application_name}
-    hr
-    b Note: Use Authorization Code. (At this point the user has already been logged-in.)
+    h1 Authorize #{application_name} by Password Credential
     hr
     p This application would like to have authorization to access your data.
     if scope
@@ -14,8 +12,12 @@ html
           if SCOPE_DESCRIPTIONS[val.trim()]
             li= val.trim() + " - " + SCOPE_DESCRIPTIONS[val.trim()]
 
-    form(name="authorize", action="/authorize", method="post")
+    form(name="authorizeByPassword", action="/authorize_by_pwd", method="post")
+      label Username:
+        input(type="text", name="username", value=username)
+      label Password:
+        input(type="password", name="password", value=password)
       input(type="hidden", name="client_id", value=client_id)
-      input(type="hidden", name="response_type", value=response_type)
+      input(type="hidden", name="client_secret", value=client_secret)
       input(type="hidden", name="scope", value=scope)
       input(type="submit", value="Authorize")
