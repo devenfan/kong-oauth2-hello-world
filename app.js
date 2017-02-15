@@ -3,6 +3,7 @@ var url        = require('url');
 var bodyParser = require('body-parser');
 var express    = require("express");
 var app        = express();
+var config     = require("./config")
 
 app.set('view engine', 'jade');
 app.use(bodyParser());
@@ -25,25 +26,29 @@ function load_env_variable(name) {
   This is the secret provision key that the plugin has generated
   after being added to the API
 */
-var PROVISION_KEY = load_env_variable("PROVISION_KEY");
+var PROVISION_KEY = config.loadFromEnv ? load_env_variable("PROVISION_KEY") : config.PROVISION_KEY;
 
 /*
   URLs to Kong
 */
-var KONG_ADMIN = load_env_variable("KONG_ADMIN");
-var KONG_API = load_env_variable("KONG_API");
+var KONG_ADMIN = config.loadFromEnv ? load_env_variable("KONG_ADMIN") : config.KONG_ADMIN;
+var KONG_API = config.loadFromEnv ? load_env_variable("KONG_API") : config.KONG_API;
 
 /*
   The API Public DNS, required later when making a request
   to authorize the OAuth 2.0 client application
 */
-var API_PUBLIC_DNS = load_env_variable("API_PUBLIC_DNS");
+var API_PUBLIC_DNS = config.loadFromEnv ? load_env_variable("API_PUBLIC_DNS") : config.API_PUBLIC_DNS;
 
 /* 
   The scopes that we support, with their extended
   description for a nicer frontend user experience
 */
-var SCOPE_DESCRIPTIONS = JSON.parse(load_env_variable("SCOPES")); //The scopes that we support, with their extended
+var SCOPE_DESCRIPTIONS = config.loadFromEnv ? JSON.parse(load_env_variable("SCOPES")) : config.SCOPES; //The scopes that we support, with their extended
+
+
+
+
 
 /*
   Retrieves the OAuth 2.0 client application name from
@@ -118,14 +123,55 @@ app.post('/authorize', function(req, res) {
   });
 });
 
+//-----------------------------------------------------------------------
+/**
+ * to simulate getCode process of OAuth Server, callback by Kong
+ * */
+app.get("/simulate/getCode", function(req, res) {
+    var querystring = url.parse(req.url, true).query;
+    var code = querystring.code;
+    console.log("code: " + code);
+    res.status(200).send(code);
+});
+
+/**
+ * to simulate getToken process of OAuth Server
+ * */
+app.get("/simulate/getToken", function(req, res) {
+    var querystring = url.parse(req.url, true).query;
+    request({
+        method: "POST",
+        url: KONG_API + "/oauth2/token",
+        headers: { host: API_PUBLIC_DNS },
+        form: {
+            client_id: querystring.client_id,
+            client_secret: querystring.client_secret,
+            grant_type: querystring.grant_type,
+            code: querystring.code
+        }
+    }, function(error, response, body) {
+        var dataWithToken = JSON.parse(body);
+        console.log(dataWithToken);
+        res.status(200).send(dataWithToken);
+    });
+});
+
+//-----------------------------------------------------------------------
+
 /*
   Index page
 */
-
 app.get("/", function(req, res) {
   res.render('index');
 });
 
+
+
+
 app.listen(3000);
 
 console.log("Running at Port 3000");
+
+//http://127.0.0.1:3000/authorize?response_type=code&scope=email%20address&client_id=c683e5e2fbb9487898f81fbc0d6ffb5b
+//http://127.0.0.1:3000/simulate/getToken?client_id=c683e5e2fbb9487898f81fbc0d6ffb5b&client_secret=17e49c221d1840a58fdf84b937144000&grant_type=authorization_code&code=c16fe277a94a4119a57f7e5aa648f654
+
