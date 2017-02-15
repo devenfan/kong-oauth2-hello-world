@@ -176,7 +176,7 @@ app.get('/authorize_by_pwd', function (req, res) {
                 SCOPE_DESCRIPTIONS: SCOPE_DESCRIPTIONS
             });
         } else {
-            res.status(403).send("Invalid client_id for Password Credential");
+            res.status(403).send("Invalid client_id for Password Credentials");
         }
     });
 });
@@ -187,7 +187,7 @@ app.get('/authorize_by_pwd', function (req, res) {
  */
 app.post('/authorize_by_pwd', function (req, res) {
 
-    oauth_kong.authorize_pc(
+    oauth_kong.authorize_pc2(
         req.body.username,
         req.body.password,
         req.body.client_id,
@@ -220,7 +220,7 @@ app.get('/authorize_cc', function (req, res) {
                 SCOPE_DESCRIPTIONS: SCOPE_DESCRIPTIONS
             });
         } else {
-            res.status(403).send("Invalid client_id for Implicit Grant");
+            res.status(403).send("Invalid client_id for Client Credentials");
         }
     });
 });

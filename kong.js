@@ -140,22 +140,44 @@ var oauth_kong = {
         });
     },
 
+    authorize_pc2 : function (username, password, client_id, client_secret, scope, callback) {
+        request({
+            method: "POST",
+            url: this.KONG_API + "/oauth2/token",
+            headers: { "X-Host-Override": this.API_PUBLIC_DNS, "content-type": "application/json" },
+            body: JSON.stringify({
+                username: username,
+                password: password,
+                client_id: client_id,
+                client_secret: client_secret,
+                grant_type: "password",
+                scope: scope,
+                provision_key: this.PROVISION_KEY,
+                authenticated_userid: this.AUTHENTICATED_USERID // Hard-coding this value (it should be the logged-in user ID)
+            })
+        }, function (error, response, body) {
+            callback(JSON.parse(body));
+        });
+    },
+
     // --------------------------------------------------------------
 
     authorize_cc : function (client_id, client_secret, scope, callback) {
         request({
             method: "POST",
             url: this.KONG_API + "/oauth2/token",
-            headers: { host: this.API_PUBLIC_DNS },
-            form: {
+            headers: { "X-Host-Override": this.API_PUBLIC_DNS, "content-type": "application/json" },
+            body: JSON.stringify({
                 client_id: client_id,
                 client_secret: client_secret,
                 grant_type: "client_credentials",
                 scope: scope,
-                provision_key: this.PROVISION_KEY,
-                authenticated_userid: this.AUTHENTICATED_USERID // Hard-coding this value (it should be the logged-in user ID)
-            }
+                // provision_key: this.PROVISION_KEY,
+                // authenticated_userid: this.AUTHENTICATED_USERID // Hard-coding this value (it should be the logged-in user ID)
+            })
         }, function (error, response, body) {
+            console.log(response);
+            console.log(body);
             callback(JSON.parse(body));
         });
     },
