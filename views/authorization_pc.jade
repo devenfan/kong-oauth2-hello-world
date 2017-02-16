@@ -15,8 +15,10 @@ html
     form(name="authorizeByPassword", action="/authorize_by_pwd", method="post")
       label Username:
         input(type="text", name="username", value=username)
+        br
       label Password:
         input(type="password", name="password", value=password)
+        br
       input(type="hidden", name="client_id", value=client_id)
       input(type="hidden", name="client_secret", value=client_secret)
       input(type="hidden", name="scope", value=scope)

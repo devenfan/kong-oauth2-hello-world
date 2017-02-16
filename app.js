@@ -1,5 +1,6 @@
 var request    = require('request');
 var url        = require('url');
+var path       = require('path');
 var bodyParser = require('body-parser');
 var express    = require("express");
 var app        = express();
@@ -8,6 +9,7 @@ var oauth_kong = require("./kong");
 
 app.set('view engine', 'jade');
 app.use(bodyParser());
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Accept every SSL certificate
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -96,12 +98,18 @@ app.post('/authorize', function (req, res) {
 app.get("/simulate/getCode", function (req, res) {
 
     var querystring = url.parse(req.url, true).query;
-
     var code = querystring.code;
-    var getTokenUrl = "http://127.0.0.1:3000/simulate/getToken?client_id=c683e5e2fbb9487898f81fbc0d6ffb5b&client_secret=17e49c221d1840a58fdf84b937144000&grant_type=authorization_code&code=" + code;
+    var getTokenUrl = "";
+    if(code != null && code != undefined && code != "") {
+        getTokenUrl = "http://127.0.0.1:3000/simulate/getToken?client_id=c683e5e2fbb9487898f81fbc0d6ffb5b&client_secret=17e49c221d1840a58fdf84b937144000&grant_type=authorization_code&code=" + code;
+    }
     console.log("code: " + code);
     console.log("url: " + getTokenUrl);
-    res.status(200).send(getTokenUrl);
+    // res.status(200).send(getTokenUrl);
+
+    res.render('get_code', {
+        getTokenUrl: getTokenUrl
+    });
 
 });
 

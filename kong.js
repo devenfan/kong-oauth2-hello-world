@@ -144,7 +144,11 @@ var oauth_kong = {
         request({
             method: "POST",
             url: this.KONG_API + "/oauth2/token",
-            headers: { "X-Host-Override": this.API_PUBLIC_DNS, "content-type": "application/json" },
+            headers: {
+                "X-Host-Override": this.API_PUBLIC_DNS,
+                host: this.API_PUBLIC_DNS,
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify({
                 username: username,
                 password: password,
@@ -166,18 +170,22 @@ var oauth_kong = {
         request({
             method: "POST",
             url: this.KONG_API + "/oauth2/token",
-            headers: { "X-Host-Override": this.API_PUBLIC_DNS, "content-type": "application/json" },
+            headers: {
+                "X-Host-Override": this.API_PUBLIC_DNS,
+                host: this.API_PUBLIC_DNS,
+                "content-type": "application/json"
+            },
             body: JSON.stringify({
                 client_id: client_id,
                 client_secret: client_secret,
                 grant_type: "client_credentials",
                 scope: scope,
-                // provision_key: this.PROVISION_KEY,
-                // authenticated_userid: this.AUTHENTICATED_USERID // Hard-coding this value (it should be the logged-in user ID)
+                provision_key: this.PROVISION_KEY,
+                authenticated_userid: this.AUTHENTICATED_USERID // Hard-coding this value (it should be the logged-in user ID)
             })
         }, function (error, response, body) {
-            console.log(response);
-            console.log(body);
+            // console.log(response);
+            // console.log(body);
             callback(JSON.parse(body));
         });
     },

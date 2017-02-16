@@ -13,6 +13,7 @@ var config = {
     PROVISION_KEY: "1f2b8d4baadb4b6f93c82b1599cad575",
     KONG_ADMIN: "http://10.5.52.56:8001",
     KONG_API: "https://10.5.52.56:8443",
+    //KONG_API: "http://10.5.52.56:8000",
     API_PUBLIC_DNS: "test.com",
     SCOPES: {
         email: "Grant permissions to read your email address",
