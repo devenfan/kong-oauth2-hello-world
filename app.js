@@ -222,7 +222,7 @@ app.get('/authorize_cc', function (req, res) {
         if (application_name) {
             res.render('authorization_cc', {
                 client_id: querystring.client_id,
-                response_type: querystring.response_type,
+                client_secret: querystring.client_secret,
                 scope: querystring.scope,
                 application_name: application_name,
                 SCOPE_DESCRIPTIONS: SCOPE_DESCRIPTIONS
