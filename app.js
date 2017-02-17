@@ -99,19 +99,30 @@ app.get("/simulate/getCode", function (req, res) {
 
     var querystring = url.parse(req.url, true).query;
     var code = querystring.code;
+    var refresh_token = querystring.refresh_token;
+
     var getTokenUrl = "";
     if(code != null && code != undefined && code != "") {
-        getTokenUrl = "http://127.0.0.1:3000/simulate/getToken?client_id=c683e5e2fbb9487898f81fbc0d6ffb5b&client_secret=17e49c221d1840a58fdf84b937144000&grant_type=authorization_code&code=" + code;
+        getTokenUrl = "http://127.0.0.1:3000/simulate/getToken?client_id=c683e5e2fbb9487898f81fbc0d6ffb5b&client_secret=17e49c221d1840a58fdf84b937144000&code=" + code;
     }
+
+    var refreshTokenUrl = "";
+    if(refresh_token != null && refresh_token != undefined && refresh_token != "") {
+        refreshTokenUrl = "http://127.0.0.1:3000/simulate/refresh_token?client_id=c683e5e2fbb9487898f81fbc0d6ffb5b&client_secret=17e49c221d1840a58fdf84b937144000&refresh_token=" + refresh_token
+    }
+
     console.log("code: " + code);
+    console.log("refresh_token: " + refresh_token);
     console.log("url: " + getTokenUrl);
-    // res.status(200).send(getTokenUrl);
+    console.log("refreshTokenUrl: " + refreshTokenUrl);
 
     res.render('get_code', {
-        getTokenUrl: getTokenUrl
+        getTokenUrl: getTokenUrl,
+        refreshTokenUrl: refreshTokenUrl
     });
 
 });
+
 
 /**
  * to simulate getToken process of OAuth Server
@@ -128,6 +139,20 @@ app.get("/simulate/getToken", function (req, res) {
         }
     );
 });
+
+
+app.get('/simulate/refresh_token', function (req, res) {
+    var querystring = url.parse(req.url, true).query;
+    oauth_kong.refresh_token(
+        querystring.client_id,
+        querystring.client_secret,
+        querystring.refresh_token,
+        function (data) {
+            console.log(data);
+            res.status(200).send(data);
+        });
+});
+
 
 //-----------------------------------------------------------------------
 
@@ -203,7 +228,18 @@ app.post('/authorize_by_pwd', function (req, res) {
         req.body.scope,
         function (data) {
             console.log(data);
-            res.status(200).send(data);
+            if(data.refresh_token) {
+                res.redirect("/refresh_token"
+                    + "?client_id=" + req.body.client_id
+                    + "&client_secret=" + req.body.client_secret
+                    + "&refresh_token=" + data.refresh_token
+                    + "&token_type=" + data.token_type
+                    + "&access_token=" + data.access_token
+                    + "&expires_in=" + data.expires_in
+                );
+            } else {
+                res.status(200).send(data);
+            }
         }
     );
 });
@@ -250,6 +286,46 @@ app.post('/authorize_cc', function (req, res) {
 
 
 //-----------------------------------------------------------------------
+
+
+
+/*
+ The route that shows the refresh_token page
+ */
+app.get('/refresh_token', function (req, res) {
+    var querystring = url.parse(req.url, true).query;
+
+    res.render('refresh_token', {
+        client_id: querystring.client_id,
+        client_secret: querystring.client_secret,
+        refresh_token: querystring.refresh_token,
+        token_type: querystring.token_type,
+        access_token: querystring.access_token,
+        expires_in: querystring.expires_in
+    });
+
+});
+
+
+/*
+ The route that handles the form submit, that will
+ refresh the access token
+ */
+app.post('/refresh_token', function (req, res) {
+    oauth_kong.refresh_token(
+        req.body.client_id,
+        req.body.client_secret,
+        req.body.refresh_token,
+        function (data) {
+            console.log(data);
+            res.status(200).send(data);
+        });
+});
+
+
+
+//-----------------------------------------------------------------------
+
 /*
   Index page
 */

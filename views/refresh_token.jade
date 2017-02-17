@@ -1,0 +1,22 @@
+doctype html
+html
+    head
+        title Refresh Token
+    body
+        h1 Refresh Token
+        form(name="refreshToken", action="/refresh_token", method="post")
+            label Refresh Token:
+                input(type="text", name="refresh_token", value=refresh_token)
+                br
+            label Token Type:
+                input(type="text", name="token_type", value=token_type)
+                br
+            label Access Token:
+                input(type="text", name="access_token", value=access_token)
+                br
+            label Expires In:
+                input(type="text", name="expires_in", value=expires_in)
+                br
+            input(type="hidden", name="client_id", value=client_id)
+            input(type="hidden", name="client_secret", value=client_secret)
+            input(type="submit", value="Submit")

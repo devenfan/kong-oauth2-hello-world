@@ -52,7 +52,9 @@ var oauth_kong = {
         request({
             method: "POST",
             url: this.KONG_API + "/oauth2/authorize",
-            headers: {host: this.API_PUBLIC_DNS},
+            headers: {
+                "X-Host-Override": this.API_PUBLIC_DNS
+            },
             form: {
                 client_id: client_id,
                 response_type: "code",
@@ -84,16 +86,22 @@ var oauth_kong = {
         });
     },
 
+    //Must use JSON format
     refresh_token : function(client_id, client_secret, refresh_token, callback){
         request({
             method: "POST",
             url: this.KONG_API + "/oauth2/token",
-            form: {
-                grant_type: refresh_token,
+            headers: {
+                host: this.API_PUBLIC_DNS,
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
                 client_id: client_id,
                 client_secret: client_secret,
-                refresh_token: refresh_token
-            }
+                grant_type: "refresh_token",
+                refresh_token: refresh_token,
+                provision_key: this.PROVISION_KEY
+            })
         }, function (error, response, body) {
             callback(JSON.parse(body));
         });
