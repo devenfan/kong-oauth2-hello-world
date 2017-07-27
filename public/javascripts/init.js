@@ -41,4 +41,5 @@ function init() {
     $("#urlQueryString").val(urlQueryString);
 };
 
+
 window.onload = init;

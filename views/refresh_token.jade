@@ -9,19 +9,26 @@ html
       div.page-header
         h1 Refresh Token
       div.row
-        form(name="refreshToken", action="/refresh_token", method="post")
-          label Refresh Token:
-            input(type="text", name="refresh_token", value=refresh_token)
-            br
-          label Token Type:
-            input(type="text", name="token_type", value=token_type)
-            br
-          label Access Token:
-            input(type="text", name="access_token", value=access_token)
-            br
-          label Expires In:
-            input(type="text", name="expires_in", value=expires_in)
-            br
-          input(type="hidden", name="client_id", value=client_id)
-          input(type="hidden", name="client_secret", value=client_secret)
-          input(type="submit", value="Submit")
+        form.form-horizontal(name="refreshToken", action="/refresh_token", method="post")
+          div.form-group
+            label.col-sm-2.control-label Refresh Token:
+            div.col-sm-10
+              input.form-control(type="text", name="refresh_token", value=refresh_token)
+          div.form-group
+            label.col-sm-2.control-label Token Type:
+            div.col-sm-10
+              input.form-control(type="text", name="token_type", value=token_type)
+          div.form-group
+            label.col-sm-2.control-label Access Token:
+            div.col-sm-10
+              input.form-control(type="text", name="access_token", value=access_token)
+          div.form-group
+            label.col-sm-2.control-label Expires In:
+            div.col-sm-10
+              input.form-control(type="text", name="expires_in", value=expires_in)
+          div.form-group
+            input(type="hidden", name="client_id", value=client_id)
+            input(type="hidden", name="client_secret", value=client_secret)
+          div.form-group
+            div.col-sm-offset-2.col-sm-10
+              input.btn.btn-default(type="submit", value="Submit")

@@ -7,7 +7,9 @@ html
   body
     div.container
       div.row
-        h1 Authorize #{application_name} by Password Credential
+        h1 Authorize App: #{application_name}
+        hr
+        b Note: Using Password Credential
         hr
         p This application would like to have authorization to access your data.
         if scope
@@ -15,17 +17,23 @@ html
             each val in scope.split(" ")
               if SCOPE_DESCRIPTIONS[val.trim()]
                 li= val.trim() + " - " + SCOPE_DESCRIPTIONS[val.trim()]
+        br
       div.row
-        form(name="authorizeByPassword", action="/authorize_by_pwd", method="post")
-          div.form-group
-            label Username:
-              input(type="text", name="username", value=username)
-          div.form-group
-            label Password:
-              input(type="password", name="password", value=password)
-          div.form-group
-            input(type="hidden", name="client_id", value=client_id)
-            input(type="hidden", name="client_secret", value=client_secret)
-            input(type="hidden", name="scope", value=scope)
-          div.form-group
-            input.btn.btn-default(type="submit", value="Authorize")
+        div.col-md-9
+          form.form-horizontal(name="authorizeByPassword", action="/authorize_by_pwd", method="post")
+            div.form-group
+              label.col-sm-3.control-label Username:
+              div.col-sm-9
+                input.form-control(type="text", name="username", value=username)
+            div.form-group
+              label.col-sm-3.control-label Password:
+              div.col-sm-9
+                input.form-control(type="password", name="password", value=password)
+            div.form-group
+              input(type="hidden", name="client_id", value=client_id)
+              input(type="hidden", name="client_secret", value=client_secret)
+              input(type="hidden", name="scope", value=scope)
+              input(type="hidden", name="state", value=state)
+            div.form-group
+              div.col-sm-offset-3.col-sm-9
+                input.btn.btn-default(type="submit", value="Authorize")

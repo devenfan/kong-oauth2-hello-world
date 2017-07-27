@@ -10,16 +10,16 @@ html
   body
     div.container
       div.page-header
-        h1 Get Code Sample
+        h1(id='title') Get Code (#{state})
       div.row
-        div.col-md-9
+        div.col-md-12
           br
           div.input-group.input-group-lg
-            span.input-group-addon.glyphicon.glyphicon-info-sign(aria-hidden="true" style="text-align:left") urlFragment:
+            span.input-group-addon(aria-hidden="true" style="text-align:left") urlFragment:
               input.form-control(id="urlFragment", type="text", placeholder="")
           br
           div.input-group.input-group-lg
-            span.input-group-addon.glyphicon.glyphicon-info-sign(aria-hidden="true" style="text-align:left") urlQueryString:
+            span.input-group-addon(aria-hidden="true" style="text-align:left") urlQueryString:
               input.form-control(id="urlQueryString", type="text", placeholder="")
           br
           div.input-group.input-group-lg
@@ -29,4 +29,5 @@ html
           div.input-group.input-group-lg
             span.input-group-addon.glyphicon.glyphicon-info-sign(aria-hidden="true" style="text-align:left") refreshTokenUrl:
               input.form-control(id="refreshTokenUrl", type="text", placeholder="" value="#{refreshTokenUrl}")
+          br
 

@@ -25,28 +25,33 @@ function load_env_variable(name) {
   }
 }
 
+// -----------------------------------------------------------------------------------------------------
+
 /*
   This is the secret provision key that the plugin has generated
   after being added to the API
 */
-var PROVISION_KEY = config.loadFromEnv ? load_env_variable("PROVISION_KEY") : config.PROVISION_KEY;
+oauth_kong.PROVISION_KEY = config.loadFromEnv ? load_env_variable("PROVISION_KEY") : config.PROVISION_KEY;
 
 /*
   URLs to Kong
 */
-var KONG_ADMIN = config.loadFromEnv ? load_env_variable("KONG_ADMIN") : config.KONG_ADMIN;
-var KONG_API = config.loadFromEnv ? load_env_variable("KONG_API") : config.KONG_API;
+oauth_kong.KONG_ADMIN_SERVER = config.loadFromEnv ? load_env_variable("KONG_ADMIN_SERVER") : config.KONG_ADMIN_SERVER;
+oauth_kong.KONG_API_SERVER = config.loadFromEnv ? load_env_variable("KONG_API_SERVER") : config.KONG_API_SERVER;
 
 /*
   The API Public DNS, required later when making a request
   to authorize the OAuth 2.0 client application
 */
-var API_PUBLIC_DNS = config.loadFromEnv ? load_env_variable("API_PUBLIC_DNS") : config.API_PUBLIC_DNS;
+oauth_kong.API_PUBLIC_DNS = config.loadFromEnv ? load_env_variable("API_PUBLIC_DNS") : config.API_PUBLIC_DNS;
 
 /*
   The API URI
 */
-var API_URI = config.loadFromEnv ? load_env_variable("API_URI") : config.API_URI;
+oauth_kong.API_URI = config.loadFromEnv ? load_env_variable("API_URI") : config.API_URI;
+
+
+// -----------------------------------------------------------------------------------------------------
 
 /* 
   The scopes that we support, with their extended
@@ -55,16 +60,15 @@ var API_URI = config.loadFromEnv ? load_env_variable("API_URI") : config.API_URI
 var SCOPE_DESCRIPTIONS = config.loadFromEnv ? JSON.parse(load_env_variable("SCOPES")) : config.SCOPES; //The scopes that we support, with their extended
 
 
-var NODE_APP_HOST = config.loadFromEnv ? JSON.parse(load_env_variable("NODE_APP_HOST")) : config.NODE_APP_HOST;
+var CLIENT_APP_URL = config.loadFromEnv ? JSON.parse(load_env_variable("CLIENT_APP_URL")) : config.CLIENT_APP_URL;
 
-oauth_kong.KONG_ADMIN = KONG_ADMIN;
-oauth_kong.KONG_API = KONG_API;
-oauth_kong.API_PUBLIC_DNS = API_PUBLIC_DNS;
-oauth_kong.API_URI = API_URI;
-oauth_kong.PROVISION_KEY = PROVISION_KEY;
+var CLIENT_ID = config.loadFromEnv ? JSON.parse(load_env_variable("CLIENT_ID")) : config.CLIENT_ID;
+
+var CLIENT_SECRET = config.loadFromEnv ? JSON.parse(load_env_variable("CLIENT_ID")) : config.CLIENT_SECRET;
 
 
-//-----------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------------
+
 
 /*
   The route that shows the authorization page
@@ -77,6 +81,7 @@ app.get('/authorize', function (req, res) {
                 client_id: querystring.client_id,
                 response_type: querystring.response_type,
                 scope: querystring.scope,
+                state: "Authorization Code Process",
                 application_name: application_name,
                 SCOPE_DESCRIPTIONS: SCOPE_DESCRIPTIONS
             });
@@ -94,9 +99,10 @@ app.post('/authorize', function (req, res) {
     oauth_kong.authorize_ac(
         req.body.client_id,
         req.body.scope,
+        req.body.state,
         function (success, data) {
             if(success) {
-                var redirect_uri = data;
+                var redirect_uri = data.redirect_uri ;
                 res.redirect(redirect_uri);
             } else {
                 res.status(200).send(data);
@@ -113,25 +119,28 @@ app.get("/simulate/getCode", function (req, res) {
     var querystring = url.parse(req.url, true).query;
     var code = querystring.code;
     var refresh_token = querystring.refresh_token;
+    var state = querystring.state;
 
     var getTokenUrl = "";
     if(code != null && code != undefined && code != "") {
-        getTokenUrl = NODE_APP_HOST + "/simulate/getToken?client_id=c683e5e2fbb9487898f81fbc0d6ffb5b&client_secret=17e49c221d1840a58fdf84b937144000&code=" + code;
+        getTokenUrl = CLIENT_APP_URL + "/simulate/getToken?client_id=" + CLIENT_ID + "&client_secret=" + CLIENT_SECRET + "&code=" + code;
     }
 
     var refreshTokenUrl = "";
     if(refresh_token != null && refresh_token != undefined && refresh_token != "") {
-        refreshTokenUrl = NODE_APP_HOST + "/simulate/refresh_token?client_id=c683e5e2fbb9487898f81fbc0d6ffb5b&client_secret=17e49c221d1840a58fdf84b937144000&refresh_token=" + refresh_token
+        refreshTokenUrl = CLIENT_APP_URL + "/simulate/refresh_token?client_id=" + CLIENT_ID + "&client_secret=" + CLIENT_SECRET + "&refresh_token=" + refresh_token
     }
 
     console.log("code: " + code);
     console.log("refresh_token: " + refresh_token);
-    console.log("url: " + getTokenUrl);
+    console.log("state: " + state)
+    console.log("getTokenUrl: " + getTokenUrl);
     console.log("refreshTokenUrl: " + refreshTokenUrl);
 
     res.render('get_code', {
         getTokenUrl: getTokenUrl,
-        refreshTokenUrl: refreshTokenUrl
+        refreshTokenUrl: refreshTokenUrl,
+        state: state
     });
 
 });
@@ -180,6 +189,7 @@ app.get('/authorize_ig', function (req, res) {
                 client_id: querystring.client_id,
                 response_type: querystring.response_type,
                 scope: querystring.scope,
+                state: "Implicit Grant Process",
                 application_name: application_name,
                 SCOPE_DESCRIPTIONS: SCOPE_DESCRIPTIONS
             });
@@ -198,6 +208,7 @@ app.post('/authorize_ig', function (req, res) {
     oauth_kong.authorize_ig(
         req.body.client_id,
         req.body.scope,
+        req.body.state,
         function (redirect_uri) {
             res.redirect(redirect_uri);
         });
@@ -218,6 +229,7 @@ app.get('/authorize_by_pwd', function (req, res) {
                 client_id: querystring.client_id,
                 client_secret: querystring.client_secret,
                 scope: querystring.scope,
+                state: "Password Credential Process",
                 application_name: application_name,
                 SCOPE_DESCRIPTIONS: SCOPE_DESCRIPTIONS
             });
@@ -239,6 +251,7 @@ app.post('/authorize_by_pwd', function (req, res) {
         req.body.client_id,
         req.body.client_secret,
         req.body.scope,
+        req.body.state,
         function (data) {
             console.log(data);
             if(data.refresh_token) {
@@ -273,6 +286,7 @@ app.get('/authorize_cc', function (req, res) {
                 client_id: querystring.client_id,
                 client_secret: querystring.client_secret,
                 scope: querystring.scope,
+                state: "Client Credential Process",
                 application_name: application_name,
                 SCOPE_DESCRIPTIONS: SCOPE_DESCRIPTIONS
             });
@@ -291,6 +305,7 @@ app.post('/authorize_cc', function (req, res) {
         req.body.client_id,
         req.body.client_secret,
         req.body.scope,
+        req.body.state,
         function (data) {
             console.log(data);
             res.status(200).send(data);
@@ -343,10 +358,14 @@ app.post('/refresh_token', function (req, res) {
   Index page
 */
 app.get("/", function(req, res) {
-  res.render('index');
+  res.render('index', {
+      client_app_url: CLIENT_APP_URL,
+      client_id: CLIENT_ID,
+      client_secret: CLIENT_SECRET
+  });
 });
 
-
+//-----------------------------------------------------------------------
 
 
 app.listen(3000);

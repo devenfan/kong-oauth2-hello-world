@@ -10,8 +10,8 @@ var oauth_kong = {
 
     // --------------------------------------------------------------
 
-    KONG_ADMIN: null,
-    KONG_API: null,
+    KONG_ADMIN_SERVER: null,
+    KONG_API_SERVER: null,
     API_PUBLIC_DNS: null,
     API_URI: null,
     PROVISION_KEY: null,
@@ -27,7 +27,7 @@ var oauth_kong = {
     get_application_name: function (client_id, callback) {
         request({
             method: "GET",
-            url: this.KONG_ADMIN + "/oauth2",    //获取oauth2 appName的接口
+            url: this.KONG_ADMIN_SERVER + "/oauth2",    //获取oauth2 appName的接口
             qs: {client_id: client_id}
         }, function (error, response, body) {
             var application_name;
@@ -49,18 +49,19 @@ var oauth_kong = {
      user submits the form.
      If succeed, the authorization code will be callback
      */
-    authorize_ac: function (client_id, scope, callback) {
+    authorize_ac: function (client_id, scope, state, callback) {
         request({
             method: "POST",
-            url: this.KONG_API + this.API_URI + "/oauth2/authorize",  //进行oauth2验证的接口
-            // headers: {
-            //     "X-Host-Override": this.API_PUBLIC_DNS,
-            //     "Host": this.API_PUBLIC_DNS
-            // },
+            url: this.KONG_API_SERVER + this.API_URI + "/oauth2/authorize",  //进行oauth2验证的接口
+            headers: {
+                "X-Host-Override": this.API_PUBLIC_DNS,
+                "Host": this.API_PUBLIC_DNS
+            },
             form: {
                 client_id: client_id,
                 response_type: "code",
                 scope: scope,
+                state: state,
                 provision_key: this.PROVISION_KEY,
                 authenticated_userid: this.AUTHENTICATED_USERID // Hard-coding this value (it should be the logged-in user ID)
             }
@@ -69,7 +70,7 @@ var oauth_kong = {
             if(error || respBody.error || !respBody.redirect_uri) {
                 callback(false, respBody)
             } else {
-                callback(true, respBody.redirect_uri);
+                callback(true, respBody);
             }
         });
     },
@@ -80,7 +81,7 @@ var oauth_kong = {
     authorize_ac_2nd_step : function (client_id, client_secret, code, callback) {
         request({
             method: "POST",
-            url: this.KONG_API + this.API_URI + "/oauth2/token",
+            url: this.KONG_API_SERVER + this.API_URI + "/oauth2/token",
             headers: { host: this.API_PUBLIC_DNS },
             form: {
                 client_id: client_id,
@@ -97,7 +98,7 @@ var oauth_kong = {
     refresh_token : function(client_id, client_secret, refresh_token, callback){
         request({
             method: "POST",
-            url: this.KONG_API + this.API_URI + "/oauth2/token",
+            url: this.KONG_API_SERVER + this.API_URI + "/oauth2/token",
             headers: {
                 host: this.API_PUBLIC_DNS,
                 "content-type": "application/json"
@@ -116,15 +117,16 @@ var oauth_kong = {
 
     // --------------------------------------------------------------
 
-    authorize_ig: function (client_id, scope, callback) {
+    authorize_ig: function (client_id, scope, state, callback) {
         request({
             method: "POST",
-            url: this.KONG_API + this.API_URI + "/oauth2/authorize",
+            url: this.KONG_API_SERVER + this.API_URI + "/oauth2/authorize",
             headers: {host: this.API_PUBLIC_DNS},
             form: {
                 client_id: client_id,
                 response_type: "token",
                 scope: scope,
+                state: state,
                 provision_key: this.PROVISION_KEY,
                 authenticated_userid: this.AUTHENTICATED_USERID // Hard-coding this value (it should be the logged-in user ID)
             }
@@ -135,10 +137,10 @@ var oauth_kong = {
 
     // --------------------------------------------------------------
 
-    authorize_pc : function (username, password, client_id, client_secret, scope, callback) {
+    authorize_pc : function (username, password, client_id, client_secret, scope, state, callback) {
         request({
             method: "POST",
-            url: this.KONG_API + this.API_URI + "/oauth2/token",
+            url: this.KONG_API_SERVER + this.API_URI + "/oauth2/token",
             headers: { host: this.API_PUBLIC_DNS },
             form: {
                 username: username,
@@ -147,6 +149,7 @@ var oauth_kong = {
                 client_secret: client_secret,
                 grant_type: "password",
                 scope: scope,
+                state: state,
                 provision_key: this.PROVISION_KEY,
                 authenticated_userid: this.AUTHENTICATED_USERID // Hard-coding this value (it should be the logged-in user ID)
             }
@@ -155,10 +158,10 @@ var oauth_kong = {
         });
     },
 
-    authorize_pc2 : function (username, password, client_id, client_secret, scope, callback) {
+    authorize_pc2 : function (username, password, client_id, client_secret, scope, state, callback) {
         request({
             method: "POST",
-            url: this.KONG_API + this.API_URI + "/oauth2/token",
+            url: this.KONG_API_SERVER + this.API_URI + "/oauth2/token",
             headers: {
                 "X-Host-Override": this.API_PUBLIC_DNS,
                 "host": this.API_PUBLIC_DNS,
@@ -171,6 +174,7 @@ var oauth_kong = {
                 client_secret: client_secret,
                 grant_type: "password",
                 scope: scope,
+                state: state,
                 provision_key: this.PROVISION_KEY,
                 authenticated_userid: this.AUTHENTICATED_USERID // Hard-coding this value (it should be the logged-in user ID)
             })
@@ -181,10 +185,10 @@ var oauth_kong = {
 
     // --------------------------------------------------------------
 
-    authorize_cc : function (client_id, client_secret, scope, callback) {
+    authorize_cc : function (client_id, client_secret, scope, state, callback) {
         request({
             method: "POST",
-            url: this.KONG_API + this.API_URI + "/oauth2/token",
+            url: this.KONG_API_SERVER + this.API_URI + "/oauth2/token",
             headers: {
                 "X-Host-Override": this.API_PUBLIC_DNS,
                 "host": this.API_PUBLIC_DNS,
@@ -195,6 +199,7 @@ var oauth_kong = {
                 client_secret: client_secret,
                 grant_type: "client_credentials",
                 scope: scope,
+                state: state,
                 provision_key: this.PROVISION_KEY,
                 authenticated_userid: this.AUTHENTICATED_USERID // Hard-coding this value (it should be the logged-in user ID)
             })
@@ -206,4 +211,5 @@ var oauth_kong = {
     },
 
 };
+
 module.exports = oauth_kong;
