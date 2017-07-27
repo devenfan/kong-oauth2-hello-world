@@ -15,10 +15,13 @@ var config = {
     KONG_API: "https://10.5.52.56:8443",
     //KONG_API: "http://10.5.52.56:8000",
     API_PUBLIC_DNS: "test.com",
+    API_URI: "/test",
     SCOPES: {
         email: "Grant permissions to read your email address",
         address: "Grant permissions to read your address information",
         phone: "Grant permissions to read your mobile phone number"
-    }
+    },
+
+    NODE_APP_HOST: "http://127.0.0.1:3000"  //当前node app 节点的访问地址
 };
 module.exports = config;

@@ -2,19 +2,23 @@ doctype html
 html
   head
     title Kong OAuth 2.0 Sample
+    link(rel='stylesheet', href='/stylesheets/bootstrap-3.3.7/css/bootstrap.css')
+    link(rel='stylesheet', href='/stylesheets/bootstrap-3.3.7/css/bootstrap-theme.css')
   body
-    h1 Welcome to the OAuth 2.0 Hello World for Kong
-    p This sample application has been created to demostrate the implementation required to support the three-legged OAuth 2.0 flow using Kong.
-    ul
-      li
-        a(href="https://github.com/Mashape/kong-oauth2-hello-world/blob/master/README.md") Instructions
-      li
-        a(href="https://getkong.org/") Kong Homepage
-      li
-        a(href="http://127.0.0.1:3000/authorize?response_type=code&scope=email%20address&client_id=c683e5e2fbb9487898f81fbc0d6ffb5b") OAuth - Authorization Code
-      li
-        a(href="http://127.0.0.1:3000/authorize_ig?response_type=token&scope=email%20address&client_id=c683e5e2fbb9487898f81fbc0d6ffb5b") OAuth - Implicit Grant
-      li
-        a(href="http://127.0.0.1:3000/authorize_by_pwd?client_id=c683e5e2fbb9487898f81fbc0d6ffb5b&client_secret=17e49c221d1840a58fdf84b937144000&scope=email%20address") OAuth - Password Grant
-      li
-        a(href="http://127.0.0.1:3000/authorize_cc?client_id=c683e5e2fbb9487898f81fbc0d6ffb5b&client_secret=17e49c221d1840a58fdf84b937144000&scope=email%20address") OAuth - Client Credentials
+    div.container
+      div.page-header
+        h1 Welcome to the OAuth 2.0 Hello World for Kong
+        p This sample application has been created to demostrate the implementation required to support the OAuth 2.0 flow using Kong.
+      div.row
+        div.col-md-9
+          ul.nav
+            //li
+            //  a.navbar-link(href="https://getkong.org/") Kong Homepage
+            li
+              a.navbar-link(href="http://127.0.0.1:3000/authorize?response_type=code&scope=email%20address&client_id=c683e5e2fbb9487898f81fbc0d6ffb5b") OAuth - Authorization Code
+            li
+              a.navbar-link(href="http://127.0.0.1:3000/authorize_ig?response_type=token&scope=email%20address&client_id=c683e5e2fbb9487898f81fbc0d6ffb5b") OAuth - Implicit Grant
+            li
+              a.navbar-link(href="http://127.0.0.1:3000/authorize_by_pwd?client_id=c683e5e2fbb9487898f81fbc0d6ffb5b&client_secret=17e49c221d1840a58fdf84b937144000&scope=email%20address") OAuth - Password Grant
+            li
+              a.navbar-link(href="http://127.0.0.1:3000/authorize_cc?client_id=c683e5e2fbb9487898f81fbc0d6ffb5b&client_secret=17e49c221d1840a58fdf84b937144000&scope=email%20address") OAuth - Client Credentials

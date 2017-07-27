@@ -43,6 +43,11 @@ var KONG_API = config.loadFromEnv ? load_env_variable("KONG_API") : config.KONG_
 */
 var API_PUBLIC_DNS = config.loadFromEnv ? load_env_variable("API_PUBLIC_DNS") : config.API_PUBLIC_DNS;
 
+/*
+  The API URI
+*/
+var API_URI = config.loadFromEnv ? load_env_variable("API_URI") : config.API_URI;
+
 /* 
   The scopes that we support, with their extended
   description for a nicer frontend user experience
@@ -50,9 +55,12 @@ var API_PUBLIC_DNS = config.loadFromEnv ? load_env_variable("API_PUBLIC_DNS") : 
 var SCOPE_DESCRIPTIONS = config.loadFromEnv ? JSON.parse(load_env_variable("SCOPES")) : config.SCOPES; //The scopes that we support, with their extended
 
 
+var NODE_APP_HOST = config.loadFromEnv ? JSON.parse(load_env_variable("NODE_APP_HOST")) : config.NODE_APP_HOST;
+
 oauth_kong.KONG_ADMIN = KONG_ADMIN;
 oauth_kong.KONG_API = KONG_API;
 oauth_kong.API_PUBLIC_DNS = API_PUBLIC_DNS;
+oauth_kong.API_URI = API_URI;
 oauth_kong.PROVISION_KEY = PROVISION_KEY;
 
 
@@ -86,8 +94,13 @@ app.post('/authorize', function (req, res) {
     oauth_kong.authorize_ac(
         req.body.client_id,
         req.body.scope,
-        function (redirect_uri) {
-            res.redirect(redirect_uri);
+        function (success, data) {
+            if(success) {
+                var redirect_uri = data;
+                res.redirect(redirect_uri);
+            } else {
+                res.status(200).send(data);
+            }
         });
 });
 
@@ -103,12 +116,12 @@ app.get("/simulate/getCode", function (req, res) {
 
     var getTokenUrl = "";
     if(code != null && code != undefined && code != "") {
-        getTokenUrl = "http://127.0.0.1:3000/simulate/getToken?client_id=c683e5e2fbb9487898f81fbc0d6ffb5b&client_secret=17e49c221d1840a58fdf84b937144000&code=" + code;
+        getTokenUrl = NODE_APP_HOST + "/simulate/getToken?client_id=c683e5e2fbb9487898f81fbc0d6ffb5b&client_secret=17e49c221d1840a58fdf84b937144000&code=" + code;
     }
 
     var refreshTokenUrl = "";
     if(refresh_token != null && refresh_token != undefined && refresh_token != "") {
-        refreshTokenUrl = "http://127.0.0.1:3000/simulate/refresh_token?client_id=c683e5e2fbb9487898f81fbc0d6ffb5b&client_secret=17e49c221d1840a58fdf84b937144000&refresh_token=" + refresh_token
+        refreshTokenUrl = NODE_APP_HOST + "/simulate/refresh_token?client_id=c683e5e2fbb9487898f81fbc0d6ffb5b&client_secret=17e49c221d1840a58fdf84b937144000&refresh_token=" + refresh_token
     }
 
     console.log("code: " + code);

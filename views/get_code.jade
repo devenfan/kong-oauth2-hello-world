@@ -3,19 +3,30 @@ html
   head
     meta(charset="utf-8")
     title Get Code Sample
+    link(rel='stylesheet', href='/stylesheets/bootstrap-3.3.7/css/bootstrap.css')
+    link(rel='stylesheet', href='/stylesheets/bootstrap-3.3.7/css/bootstrap-theme.css')
     script(src="/javascripts/jquery.min.js")
     script(src="/javascripts/init.js")
   body
-    h1 Get Code Sample
-    br
-    label urlFragment:
-      input(id="urlFragment")
-    br
-    label urlQueryString:
-      input(id="urlQueryString")
-    br
-    label getTokenUrl:
-      input(id="getTokenUrl" value="#{getTokenUrl}")
-    br
-    label refreshTokenUrl:
-      input(id="refreshTokenUrl" value="#{refreshTokenUrl}")
+    div.container
+      div.page-header
+        h1 Get Code Sample
+      div.row
+        div.col-md-9
+          br
+          div.input-group.input-group-lg
+            span.input-group-addon.glyphicon.glyphicon-info-sign(aria-hidden="true" style="text-align:left") urlFragment:
+              input.form-control(id="urlFragment", type="text", placeholder="")
+          br
+          div.input-group.input-group-lg
+            span.input-group-addon.glyphicon.glyphicon-info-sign(aria-hidden="true" style="text-align:left") urlQueryString:
+              input.form-control(id="urlQueryString", type="text", placeholder="")
+          br
+          div.input-group.input-group-lg
+            span.input-group-addon.glyphicon.glyphicon-info-sign(aria-hidden="true" style="text-align:left") getTokenUrl:
+              input.form-control(id="getTokenUrl", type="text", placeholder="" value="#{getTokenUrl}")
+          br
+          div.input-group.input-group-lg
+            span.input-group-addon.glyphicon.glyphicon-info-sign(aria-hidden="true" style="text-align:left") refreshTokenUrl:
+              input.form-control(id="refreshTokenUrl", type="text", placeholder="" value="#{refreshTokenUrl}")
+

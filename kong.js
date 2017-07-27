@@ -13,6 +13,7 @@ var oauth_kong = {
     KONG_ADMIN: null,
     KONG_API: null,
     API_PUBLIC_DNS: null,
+    API_URI: null,
     PROVISION_KEY: null,
     AUTHENTICATED_USERID: "userid123",
 
@@ -26,7 +27,7 @@ var oauth_kong = {
     get_application_name: function (client_id, callback) {
         request({
             method: "GET",
-            url: this.KONG_ADMIN + "/oauth2",
+            url: this.KONG_ADMIN + "/oauth2",    //获取oauth2 appName的接口
             qs: {client_id: client_id}
         }, function (error, response, body) {
             var application_name;
@@ -51,10 +52,11 @@ var oauth_kong = {
     authorize_ac: function (client_id, scope, callback) {
         request({
             method: "POST",
-            url: this.KONG_API + "/oauth2/authorize",
-            headers: {
-                "X-Host-Override": this.API_PUBLIC_DNS
-            },
+            url: this.KONG_API + this.API_URI + "/oauth2/authorize",  //进行oauth2验证的接口
+            // headers: {
+            //     "X-Host-Override": this.API_PUBLIC_DNS,
+            //     "Host": this.API_PUBLIC_DNS
+            // },
             form: {
                 client_id: client_id,
                 response_type: "code",
@@ -63,7 +65,12 @@ var oauth_kong = {
                 authenticated_userid: this.AUTHENTICATED_USERID // Hard-coding this value (it should be the logged-in user ID)
             }
         }, function (error, response, body) {
-            callback(JSON.parse(body).redirect_uri);
+            var respBody = JSON.parse(body);
+            if(error || respBody.error || !respBody.redirect_uri) {
+                callback(false, respBody)
+            } else {
+                callback(true, respBody.redirect_uri);
+            }
         });
     },
 
@@ -73,7 +80,7 @@ var oauth_kong = {
     authorize_ac_2nd_step : function (client_id, client_secret, code, callback) {
         request({
             method: "POST",
-            url: this.KONG_API + "/oauth2/token",
+            url: this.KONG_API + this.API_URI + "/oauth2/token",
             headers: { host: this.API_PUBLIC_DNS },
             form: {
                 client_id: client_id,
@@ -90,7 +97,7 @@ var oauth_kong = {
     refresh_token : function(client_id, client_secret, refresh_token, callback){
         request({
             method: "POST",
-            url: this.KONG_API + "/oauth2/token",
+            url: this.KONG_API + this.API_URI + "/oauth2/token",
             headers: {
                 host: this.API_PUBLIC_DNS,
                 "content-type": "application/json"
@@ -112,7 +119,7 @@ var oauth_kong = {
     authorize_ig: function (client_id, scope, callback) {
         request({
             method: "POST",
-            url: this.KONG_API + "/oauth2/authorize",
+            url: this.KONG_API + this.API_URI + "/oauth2/authorize",
             headers: {host: this.API_PUBLIC_DNS},
             form: {
                 client_id: client_id,
@@ -131,7 +138,7 @@ var oauth_kong = {
     authorize_pc : function (username, password, client_id, client_secret, scope, callback) {
         request({
             method: "POST",
-            url: this.KONG_API + "/oauth2/token",
+            url: this.KONG_API + this.API_URI + "/oauth2/token",
             headers: { host: this.API_PUBLIC_DNS },
             form: {
                 username: username,
@@ -151,10 +158,10 @@ var oauth_kong = {
     authorize_pc2 : function (username, password, client_id, client_secret, scope, callback) {
         request({
             method: "POST",
-            url: this.KONG_API + "/oauth2/token",
+            url: this.KONG_API + this.API_URI + "/oauth2/token",
             headers: {
                 "X-Host-Override": this.API_PUBLIC_DNS,
-                host: this.API_PUBLIC_DNS,
+                "host": this.API_PUBLIC_DNS,
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
@@ -177,10 +184,10 @@ var oauth_kong = {
     authorize_cc : function (client_id, client_secret, scope, callback) {
         request({
             method: "POST",
-            url: this.KONG_API + "/oauth2/token",
+            url: this.KONG_API + this.API_URI + "/oauth2/token",
             headers: {
                 "X-Host-Override": this.API_PUBLIC_DNS,
-                host: this.API_PUBLIC_DNS,
+                "host": this.API_PUBLIC_DNS,
                 "content-type": "application/json"
             },
             body: JSON.stringify({

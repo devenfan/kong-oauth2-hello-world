@@ -2,24 +2,30 @@ doctype html
 html
   head
     title Authorize Application
+    link(rel='stylesheet', href='/stylesheets/bootstrap-3.3.7/css/bootstrap.css')
+    link(rel='stylesheet', href='/stylesheets/bootstrap-3.3.7/css/bootstrap-theme.css')
   body
-    h1 Authorize #{application_name} by Password Credential
-    hr
-    p This application would like to have authorization to access your data.
-    if scope
-      ul
-        each val in scope.split(" ")
-          if SCOPE_DESCRIPTIONS[val.trim()]
-            li= val.trim() + " - " + SCOPE_DESCRIPTIONS[val.trim()]
-
-    form(name="authorizeByPassword", action="/authorize_by_pwd", method="post")
-      label Username:
-        input(type="text", name="username", value=username)
-        br
-      label Password:
-        input(type="password", name="password", value=password)
-        br
-      input(type="hidden", name="client_id", value=client_id)
-      input(type="hidden", name="client_secret", value=client_secret)
-      input(type="hidden", name="scope", value=scope)
-      input(type="submit", value="Authorize")
+    div.container
+      div.row
+        h1 Authorize #{application_name} by Password Credential
+        hr
+        p This application would like to have authorization to access your data.
+        if scope
+          ul
+            each val in scope.split(" ")
+              if SCOPE_DESCRIPTIONS[val.trim()]
+                li= val.trim() + " - " + SCOPE_DESCRIPTIONS[val.trim()]
+      div.row
+        form(name="authorizeByPassword", action="/authorize_by_pwd", method="post")
+          div.form-group
+            label Username:
+              input(type="text", name="username", value=username)
+          div.form-group
+            label Password:
+              input(type="password", name="password", value=password)
+          div.form-group
+            input(type="hidden", name="client_id", value=client_id)
+            input(type="hidden", name="client_secret", value=client_secret)
+            input(type="hidden", name="scope", value=scope)
+          div.form-group
+            input.btn.btn-default(type="submit", value="Authorize")
