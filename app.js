@@ -7,7 +7,8 @@ var app        = express();
 var config     = require("./config");
 var oauth_kong = require("./kong");
 
-app.set('view engine', 'jade');
+// app.set('view engine', 'jade');
+app.set('view engine', 'pug');
 app.use(bodyParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
