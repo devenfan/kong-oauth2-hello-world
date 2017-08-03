@@ -4,7 +4,7 @@ var config = {
 
     name: 'Nodeclub', // 社区名字
     description: 'CNode：Node.js专业中文社区', // 社区的描述
-    keywords: 'nodejs, node, express, connect, socket.io',
+    keywords: 'nodejs, node, express, connect, kong',
 
     // loadFromEnv 为 true 时，从系统evn中加载
     loadFromEnv: false,

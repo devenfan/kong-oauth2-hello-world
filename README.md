@@ -1,15 +1,22 @@
 # OAuth 2.0 Hello World for Kong
 
-This is a simple node.js + express.js + jade application that demonstrates a simple implementation of the OAuth 2.0 authorization page required to make the [OAuth 2.0 plugin](http://getkong.org/plugins/oauth2-authentication) work on [Kong](getkong.org).
+This is a simple node.js + express.js + jade(now is pug) application that demonstrates a simple implementation of the OAuth 2.0 authorization page required to make the [OAuth 2.0 plugin](http://getkong.org/plugins/oauth2-authentication) work on [Kong 0.10.3](getkong.org).
 
 # Files
 
-This project is made of two main files:
-
-* `app.js`, which handles the server and contains two routes:
-  * `GET /authorize`, that shows the authorization page to the end user
-  * `POST /authorize`, that handles the form submit and triggers the authorization process on Kong
-* `authorization.jade`, which is the authorization page that the user will see
+* `app.js`, which handles the server and contains below routes:
+  * `GET  /`, that shows the index page with 4 types of OAuth process
+  * `GET  /authorize`, that shows the [Authorization Code] page 
+  * `POST /authorize`, that handles the form submit and triggers the [Authorization Code] process on Kong
+  * `GET  /authorize_ig`, that shows the [Implicit Grant] page 
+  * `POST /authorize_ig`, that handles the form submit and triggers the [Implicit Grant] process on Kong
+  * `GET  /authorize_by_pwd`, that shows the [Password Credential] page 
+  * `POST /authorize_by_pwd`, that handles the form submit and triggers the [Password Credential] process on Kong
+  * `GET  /authorize_cc`, that shows the [Client Credential] page 
+  * `POST /authorize_cc`, that handles the form submit and triggers the [Client Credential] process on Kong
+  
+* `kong.js`, which was defined hwo to invoke Kong OAuth methods
+* `config.js`, which was defined the testing parameters of this demo application, you may change this file firstly
 
 # Installing dependencies
 
@@ -23,80 +30,57 @@ npm install
 
 To run this project, execute the following operations.
 
-* Make sure you have Kong >= 0.4.0 running. We assume Kong is running at `127.0.0.1` with the default ports.
+* Make sure you have Kong 0.10.3 running. We assume Kong is running at `127.0.0.1` with the default ports.
 
 * Let's add a simple test API:
 
 ```shell
-curl -d "request_host=test.com" \
-     -d "upstream_url=http://mockbin.org/" \
-     http://127.0.0.1:8001/apis/
+curl -i -X POST --url http://10.5.52.56:8001/apis/   \
+     --data "name=test"   \
+     --data "uris=/test"  \
+     --data="upstream_url=http://httpbin.org"
 ```
 
 * Let's add the OAuth 2.0 plugin, with three available scopes:
 
 ```shell
-curl -d "name=oauth2" \
-     -d "config.scopes=email, phone, address" \
-     -d "config.mandatory_scope=true" \
-     -d "config.enable_authorization_code=true" \
-     http://127.0.0.1:8001/apis/test.com/plugins/
+curl -i -X POST http://10.5.52.56:8001/apis/test/plugins \
+     --data "name=oauth2"  \
+     --data "config.enable_authorization_code=true"  \ 
+     --data "config.enable_client_credentials=true"  \
+     --data "config.enable_implicit_grant=true"  \
+     --data "config.enable_password_grant=true"  \ 
+     --data "config.accept_http_if_already_terminated=true"  \
+     --data "config.global_credentials=false" \
+     --data "config.provision_key=1f2b8d4baadb4b6f93c82b1599cad575"
+
 ```
 
-This will output a response including an auto-generated `provision_key` that we need to use later:
-
-```json
-{
-    "api_id": "2c0c8c84-cd7c-40b7-c0b8-41202e5ee50b",
-    "value": {
-        "scopes": [
-            "email",
-            "phone",
-            "address"
-        ],
-        "mandatory_scope": true,
-        "provision_key": "2ef290c575cc46eec61947aa9f1e67d3",
-        "hide_credentials": false,
-        "enable_implicit_grant": false,
-        "token_expiration": 7200
-    },
-    "created_at": 1435783325000,
-    "enabled": true,
-    "name": "oauth2",
-    "id": "656954bd-2130-428f-c25c-8ec47227dafa"
-}
-```
 
 The `provision_key` will be sent by the web application when communicating with Kong, to securely authenticate itself with Kong.
 
-* Let's create a Kong consumer (called `thefosk`):
+* Let's create a Kong consumer (called `testConsumer`):
 
 ```shell
-curl -d "username=thefosk" \
-     http://127.0.0.1:8001/consumers/
+
+curl -i -X POST http://10.5.52.56:8001/consumers/  \
+     --data "username=testConsumer" \
+     --data "custom_id=testConsumerId"
 ```
 
-* And the first OAuth 2.0 client application called `Hello World App`:
+* And the first OAuth 2.0 client application called `testConsumerApp`:
 
 ```shell
-curl -d "name=Hello World App" \
-     -d "redirect_uri=http://getkong.org/" \
-     http://127.0.0.1:8001/consumers/thefosk/oauth2/
+
+curl -i -X POST http://10.5.52.56:8001/consumers/testConsumerId/oauth2 \
+     --data "name=testConsumerApp" \
+     --data "client_id=c683e5e2fbb9487898f81fbc0d6ffb5b" \
+     --data="client_secret=17e49c221d1840a58fdf84b937144000" \
+     --data="redirect_uri=http://10.5.227.17:3000/simulate/getCode"
+
 ```
 
-That outputs the following response, including the `client_id` and `client_secret` that we will use later:
-
-```json
-{
-    "consumer_id": "a0977612-bd8c-4c6f-ccea-24743112847f",
-    "client_id": "318f98be1453427bc2937fceab9811bd",
-    "id": "7ce2f90c-3ec5-4d93-cd62-3d42eb6f9b64",
-    "name": "Hello World App",
-    "created_at": 1435783376000,
-    "redirect_uri": "http://getkong.org/",
-    "client_secret": "efbc9e1f2bcc4968c988ef5b839dd5a4"
-}
-```
+Here entry point `/simulate/getCode` inside `redirect_url` will handle the callback of Kong OAuth plugin when authorize.
 
 # Running the web application
 
@@ -104,15 +88,19 @@ Now that Kong has all the data configured, we can start our application using th
 
 ```shell
 # Exporting some environment variables used by the Node.js application
-export PROVISION_KEY="2ef290c575cc46eec61947aa9f1e67d3"
-export KONG_ADMIN="http://127.0.0.1:8001"
-export KONG_API="https://127.0.0.1:8443"
+export PROVISION_KEY="1f2b8d4baadb4b6f93c82b1599cad575"
+export KONG_ADMIN_SERVER="http://your_kong_server:8001"
+export KONG_API_SERVER="https://your_kong_server:8443"
 export API_PUBLIC_DNS="test.com"
+export API_URI="/test"
+export CLIENT_ID: "c683e5e2fbb9487898f81fbc0d6ffb5b",
+export CLIENT_SECRET: "17e49c221d1840a58fdf84b937144000",
 export SCOPES="{ \
   \"email\": \"Grant permissions to read your email address\", \
   \"address\": \"Grant permissions to read your address information\", \
   \"phone\": \"Grant permissions to read your mobile phone number\" \
-}"
+}",
+export CLIENT_APP_URL: "http://127.0.0.1:3000"
 
 # Starting the node.js application
 node app.js
@@ -136,18 +124,38 @@ http://getkong.org/?code=ad286cf6694d40aac06eff2797b7208d
 
 For testing purposes we set the `redirect_uri` to `http://getkong.org`, but in production this will be an URL that the client application will be able to read to parse the code and exchange it with an access token.
 
+
 # Conclusions
 
-Done! Now the client application has a `code` that it can use later on to request an `access_token`. From a provider perspective our job only consists in showing the authorization page and redirecting the user.
-
-To retrieve an `access_token` you can now execute the following request:
+To retrieve an `access_token` by [Authorization Code] process you can now execute the following request:
 
 ```shell
-curl https://127.0.0.1:8443/oauth2/token \
-     -H "Host: test.com" \
-     -d "grant_type=authorization_code" \
-     -d "client_id=318f98be1453427bc2937fceab9811bd" \
-     -d "client_secret=efbc9e1f2bcc4968c988ef5b839dd5a4" \
-     -d "redirect_uri=http://getkong.org/" \
-     -d "code=ad286cf6694d40aac06eff2797b7208d" --insecure
+
+# Get Code
+curl -i -X POST  --url  https://10.5.52.56:8443/test/oauth2/authorize \
+     --data "client_id=c683e5e2fbb9487898f81fbc0d6ffb5b" \
+     --data "provision_key=1f2b8d4baadb4b6f93c82b1599cad575" \
+     --data "response_type=code" \
+     --data "scope=email address" \
+     --data "authenticated_userid=userid123456" \
+     --insecure
+   
+# Get Token
+curl -i -X POST  --url  https://10.5.52.56:8443/test/oauth2/token \
+     --data "client_id=c683e5e2fbb9487898f81fbc0d6ffb5b"  \
+     --data "client_secret=17e49c221d1840a58fdf84b937144000" \
+     --data "grant_type=authorization_code" \
+     --data "code=0c14324d66bf4d6abbe3003c22b11d22" \
+     --insecure
+     
+# Refresh Token
+curl -i -X POST  --url  https://10.5.52.56:8443/test/oauth2/token \
+     --data "client_id=c683e5e2fbb9487898f81fbc0d6ffb5b" \
+     --data "client_secret=17e49c221d1840a58fdf84b937144000" \
+     --data "provision_key=1f2b8d4baadb4b6f93c82b1599cad575" \ 
+     --data "grant_type=refresh_token" \
+     --data "refresh_token=bebb2a853125435a857b4cc2fc542fb1" \
+     --insecure
+
+
 ```
