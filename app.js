@@ -6,6 +6,7 @@ var express    = require("express");
 var app        = express();
 var config     = require("./config");
 var oauth_kong = require("./kong");
+var logger     = require("./logger")
 
 // app.set('view engine', 'jade');
 app.set('view engine', 'pug');
@@ -211,7 +212,8 @@ app.post('/authorize_ig', function (req, res) {
         req.body.scope,
         req.body.state,
         function (redirect_uri) {
-            res.redirect(redirect_uri);
+            logger.warn(redirect_uri);
+            //res.redirect(redirect_uri);
         });
 });
 
