@@ -213,7 +213,7 @@ app.post('/authorize_ig', function (req, res) {
         req.body.state,
         function (redirect_uri) {
             logger.warn(redirect_uri);
-            //res.redirect(redirect_uri);
+            res.redirect(redirect_uri);
         });
 });
 
