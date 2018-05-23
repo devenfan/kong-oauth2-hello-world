@@ -10,7 +10,7 @@ var config = {
     loadFromEnv: false,
 
     // 其他配置项...
-    PROVISION_KEY: " ",
+    PROVISION_KEY: "1f2b8d4baadb4b6f93c82b1599cad575",
     KONG_ADMIN_SERVER: "http://10.5.52.56:8001",   //Kong Information
     KONG_API_SERVER: "https://10.5.52.56:8443",    //Kong Information
     //KONG_API_SERVER: "http://10.5.52.56:8000",
